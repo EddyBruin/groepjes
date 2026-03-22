@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kamp 2 – Groepjes Indeler</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #F4F1EC;
+      --card: #FFFFFF;
+      --dark: #1C1C1E;
+      --mid: #6B6B6B;
+      --accent: #E8440A;
+      --accent2: #2D6BE4;
+      --green: #1A9E5C;
+      --border: #E0DDD7;
+      --tag-m: #EBF2FF;
+      --tag-m-text: #2D6BE4;
+      --tag-f: #FFF0F5;
+      --tag-f-text: #D4006A;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--dark);
+      min-height: 100vh;
+    }
+
+    /* Top bar */
+    .topbar {
+      background: var(--dark);
+      color: #fff;
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .topbar-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .topbar-title span { color: var(--accent); }
+
+    .topbar-count {
+      background: rgba(255,255,255,0.1);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    /* Main layout */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    /* Controls */
+    .controls {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 28px 32px;
+      border: 1px solid var(--border);
+      margin-bottom: 32px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    }
+
+    .controls-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--mid);
+      margin-bottom: 20px;
+    }
+
+    .control-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .control-row:last-child { margin-bottom: 0; }
+
+    .control-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--dark);
+      min-width: 180px;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .btn {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 9px 18px;
+      border-radius: 10px;
+      border: 2px solid var(--border);
+      background: var(--bg);
+      color: var(--dark);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      padding: 11px 28px;
+      font-size: 15px;
+      border-radius: 12px;
+    }
+
+    .btn.primary:hover { background: #c73a08; border-color: #c73a08; }
+
+    .btn.secondary {
+      background: var(--dark);
+      border-color: var(--dark);
+      color: #fff;
+      padding: 11px 24px;
+      border-radius: 12px;
+    }
+
+    .btn.secondary:hover { background: #333; }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 20px 0;
+    }
+
+    .action-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .mode-toggle {
+      display: flex;
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 4px;
+      border: 1px solid var(--border);
+      gap: 2px;
+    }
+
+    .mode-btn {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 7px 16px;
+      border-radius: 7px;
+      border: none;
+      background: transparent;
+      color: var(--mid);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .mode-btn.active {
+      background: var(--card);
+      color: var(--dark);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+
+    /* Status */
+    .status {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--mid);
+      font-size: 16px;
+    }
+
+    .status .icon { font-size: 48px; display: block; margin-bottom: 12px; }
+
+    /* Results */
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .results-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .results-meta {
+      font-size: 14px;
+      color: var(--mid);
+      font-weight: 500;
+    }
+
+    .groups-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .group-card {
+      background: var(--card);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      animation: fadeUp 0.3s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .group-card:nth-child(1)  { animation-delay: 0.00s; }
+    .group-card:nth-child(2)  { animation-delay: 0.04s; }
+    .group-card:nth-child(3)  { animation-delay: 0.08s; }
+    .group-card:nth-child(4)  { animation-delay: 0.12s; }
+    .group-card:nth-child(5)  { animation-delay: 0.16s; }
+    .group-card:nth-child(6)  { animation-delay: 0.20s; }
+    .group-card:nth-child(7)  { animation-delay: 0.24s; }
+    .group-card:nth-child(8)  { animation-delay: 0.28s; }
+    .group-card:nth-child(9)  { animation-delay: 0.32s; }
+    .group-card:nth-child(10) { animation-delay: 0.36s; }
+
+    .group-header {
+      padding: 14px 18px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .group-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .group-size {
+      background: var(--bg);
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--mid);
+    }
+
+    .group-body { padding: 12px 18px 16px; }
+
+    .kind-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--border);
+      gap: 8px;
+    }
+
+    .kind-row:last-child { border-bottom: none; }
+
+    .kind-naam {
+      font-size: 14px;
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .kind-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tag {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+
+    .tag-j { background: var(--tag-m); color: var(--tag-m-text); }
+    .tag-m { background: var(--tag-f); color: var(--tag-f-text); }
+    .tag-age {
+      font-size: 12px;
+      color: var(--mid);
+      font-weight: 500;
+    }
+
+    /* Sorted list view */
+    .list-view {
+      background: var(--card);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .list-section-header {
+      padding: 14px 20px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--mid);
+    }
+
+    .list-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 11px 20px;
+      border-bottom: 1px solid var(--border);
+      animation: fadeUp 0.2s ease both;
+    }
+
+    .list-row:last-child { border-bottom: none; }
+
+    .list-num {
+      font-size: 12px;
+      color: var(--mid);
+      font-weight: 600;
+      min-width: 28px;
+    }
+
+    .list-naam { font-size: 15px; font-weight: 600; flex: 1; }
+    .list-meta { display: flex; align-items: center; gap: 8px; }
+
+    @media (max-width: 600px) {
+      .topbar { padding: 14px 20px; }
+      .controls { padding: 20px; }
+      .container { padding: 24px 16px 60px; }
+      .control-label { min-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-title">Kamp 2 <span>·</span> Groepjes Indeler</div>
+  <div class="topbar-count" id="topbar-count">Laden…</div>
+</div>
+
+<div class="container">
+
+  <div class="controls">
+    <div class="controls-title">Instellingen</div>
+
+    <div class="control-row">
+      <div class="control-label">Groepjes van ... kinderen</div>
+      <div class="btn-group" id="btn-grootte"></div>
+    </div>
+
+    <div class="control-row">
+      <div class="control-label">Verdeel in ... groepen</div>
+      <div class="btn-group" id="btn-aantal"></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="action-row">
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="mode-random" onclick="setMode('random')">🎲 Willekeurig</button>
+        <button class="mode-btn" id="mode-leeftijd" onclick="setMode('leeftijd')">📅 Op leeftijd</button>
+        <button class="mode-btn" id="mode-geslacht" onclick="setMode('geslacht')">👥 Op gender</button>
+        <button class="mode-btn" id="mode-naam" onclick="setMode('naam')">🔤 Op naam</button>
+      </div>
+      <button class="btn primary" onclick="run()">↻ Opnieuw indelen</button>
+    </div>
+  </div>
+
+  <div id="resultaat">
+    <div class="status"><span class="icon">⏳</span>Kinderen laden…</div>
+  </div>
+
+</div>
+
+<script>
+  var API_URL = 'https://script.google.com/macros/s/AKfycbyw4SmPCUYoy2DU92F1vDy1SzpxlOoWkUnT9tRkGM9MuRTwGO1Kc9PNjWW8nPNKfD2Trw/exec';
+  var kinderen = [];
+  var huidigeModus = 'random';
+  var huidigeGrootte = null;
+  var huidigeAantal = null;
+  var verdeelModus = 'grootte'; // 'grootte' or 'aantal'
+
+  // Button configs
+  var groottes = [3,4,5,6,7,8,9,10,12,15];
+  var aantallen = [2,3,4,5,6,7,8,9,10,12,15];
+
+  function init() {
+    // Build buttons
+    var bg = document.getElementById('btn-grootte');
+    groottes.forEach(function(g) {
+      var b = document.createElement('button');
+      b.className = 'btn';
+      b.textContent = g;
+      b.onclick = function() { selectGrootte(g); };
+      b.id = 'g-' + g;
+      bg.appendChild(b);
+    });
+
+    var ba = document.getElementById('btn-aantal');
+    aantallen.forEach(function(a) {
+      var b = document.createElement('button');
+      b.className = 'btn';
+      b.textContent = a;
+      b.onclick = function() { selectAantal(a); };
+      b.id = 'a-' + a;
+      ba.appendChild(b);
+    });
+
+    loadKinderen();
+  }
+
+  function loadKinderen() {
+    fetch(API_URL)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        kinderen = data;
+        document.getElementById('topbar-count').textContent = kinderen.length + ' kinderen';
+        document.getElementById('resultaat').innerHTML =
+          '<div class="status"><span class="icon">👆</span>Kies een groepsgrootte of aantal groepen hierboven</div>';
+      })
+      .catch(function(e) {
+        document.getElementById('resultaat').innerHTML =
+          '<div class="status"><span class="icon">😬</span>Kon de sheet niet laden.<br><small>' + e + '</small></div>';
+      });
+  }
+
+  function selectGrootte(g) {
+    huidigeGrootte = g;
+    huidigeAantal = null;
+    verdeelModus = 'grootte';
+    document.querySelectorAll('#btn-grootte .btn').forEach(function(b) { b.classList.remove('primary'); });
+    document.querySelectorAll('#btn-aantal .btn').forEach(function(b) { b.classList.remove('primary'); });
+    document.getElementById('g-' + g).classList.add('primary');
+    run();
+  }
+
+  function selectAantal(a) {
+    huidigeAantal = a;
+    huidigeGrootte = null;
+    verdeelModus = 'aantal';
+    document.querySelectorAll('#btn-aantal .btn').forEach(function(b) { b.classList.remove('primary'); });
+    document.querySelectorAll('#btn-grootte .btn').forEach(function(b) { b.classList.remove('primary'); });
+    document.getElementById('a-' + a).classList.add('primary');
+    run();
+  }
+
+  function setMode(mode) {
+    huidigeModus = mode;
+    document.querySelectorAll('.mode-btn').forEach(function(b) { b.classList.remove('active'); });
+    document.getElementById('mode-' + mode).classList.add('active');
+    run();
+  }
+
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function run() {
+    if (!kinderen.length) return;
+
+    if (huidigeModus !== 'random') {
+      // Sort modes — show flat list
+      renderSorted();
+      return;
+    }
+
+    if (!huidigeGrootte && !huidigeAantal) {
+      document.getElementById('resultaat').innerHTML =
+        '<div class="status"><span class="icon">👆</span>Kies een groepsgrootte of aantal groepen hierboven</div>';
+      return;
+    }
+
+    var shuffled = shuffle(kinderen);
+    var groepen = [];
+
+    if (verdeelModus === 'grootte') {
+      var g = huidigeGrootte;
+      for (var i = 0; i < shuffled.length; i += g) {
+        groepen.push(shuffled.slice(i, i + g));
+      }
+      // Distribute remainder into existing groups
+      if (groepen.length > 1 && groepen[groepen.length - 1].length < g) {
+        var rest = groepen.pop();
+        for (var i = 0; i < rest.length; i++) {
+          groepen[i % groepen.length].push(rest[i]);
+        }
+      }
+    } else {
+      var n = huidigeAantal;
+      var basis = Math.floor(shuffled.length / n);
+      var extra = shuffled.length % n;
+      var idx = 0;
+      for (var i = 0; i < n; i++) {
+        var size = basis + (i < extra ? 1 : 0);
+        groepen.push(shuffled.slice(idx, idx + size));
+        idx += size;
+      }
+    }
+
+    renderGroepen(groepen);
+  }
+
+  function renderGroepen(groepen) {
+    var label = verdeelModus === 'grootte'
+      ? groepen.length + ' groepen van ~' + huidigeGrootte
+      : huidigeAantal + ' groepen';
+
+    var html = '<div class="results-header">' +
+      '<div class="results-title">Indeling</div>' +
+      '<div class="results-meta">' + kinderen.length + ' kinderen · ' + label + '</div>' +
+      '</div>' +
+      '<div class="groups-grid">';
+
+    var colors = ['#E8440A','#2D6BE4','#1A9E5C','#9B3DD6','#D4A017','#C4006A','#0891B2','#EA580C'];
+
+    groepen.forEach(function(groep, gi) {
+      var color = colors[gi % colors.length];
+      html += '<div class="group-card">' +
+        '<div class="group-header">' +
+          '<div class="group-name" style="color:' + color + '">Groep ' + (gi + 1) + '</div>' +
+          '<div class="group-size">' + groep.length + ' kinderen</div>' +
+        '</div>' +
+        '<div class="group-body">';
+
+      groep.forEach(function(k) {
+        var isJongen = k.geslacht && k.geslacht.toLowerCase().startsWith('j') || k.geslacht.toLowerCase() === 'm';
+        var tagClass = isJongen ? 'tag-j' : 'tag-m';
+        var tagLabel = k.geslacht || '?';
+        html += '<div class="kind-row">' +
+          '<div class="kind-naam">' + k.voornaam + ' ' + k.achternaam + '</div>' +
+          '<div class="kind-meta">' +
+            (k.leeftijd !== null ? '<span class="tag-age">' + k.leeftijd + 'jr</span>' : '') +
+            '<span class="tag ' + tagClass + '">' + tagLabel + '</span>' +
+          '</div>' +
+        '</div>';
+      });
+
+      html += '</div></div>';
+    });
+
+    html += '</div>';
+    document.getElementById('resultaat').innerHTML = html;
+  }
+
+  function renderSorted() {
+    var sorted = kinderen.slice();
+
+    if (huidigeModus === 'leeftijd') {
+      sorted.sort(function(a, b) { return (a.leeftijd || 0) - (b.leeftijd || 0); });
+      var html = '<div class="results-header"><div class="results-title">Gesorteerd op leeftijd</div>' +
+        '<div class="results-meta">' + kinderen.length + ' kinderen</div></div>' +
+        '<div class="list-view">';
+      sorted.forEach(function(k, i) {
+        var isJongen = k.geslacht && (k.geslacht.toLowerCase().startsWith('j') || k.geslacht.toLowerCase() === 'm');
+        html += '<div class="list-row">' +
+          '<div class="list-num">' + (i+1) + '</div>' +
+          '<div class="list-naam">' + k.voornaam + ' ' + k.achternaam + '</div>' +
+          '<div class="list-meta">' +
+            (k.leeftijd !== null ? '<span class="tag-age">' + k.leeftijd + ' jr</span>' : '') +
+            '<span class="tag ' + (isJongen ? 'tag-j' : 'tag-m') + '">' + (k.geslacht||'?') + '</span>' +
+          '</div></div>';
+      });
+      html += '</div>';
+      document.getElementById('resultaat').innerHTML = html;
+
+    } else if (huidigeModus === 'geslacht') {
+      sorted.sort(function(a,b) {
+        if (a.geslacht < b.geslacht) return -1;
+        if (a.geslacht > b.geslacht) return 1;
+        return (a.leeftijd||0) - (b.leeftijd||0);
+      });
+      var html = '<div class="results-header"><div class="results-title">Gesorteerd op gender</div>' +
+        '<div class="results-meta">' + kinderen.length + ' kinderen</div></div>' +
+        '<div class="list-view">';
+      var huidigGeslacht = null;
+      var num = 1;
+      sorted.forEach(function(k) {
+        var isJongen = k.geslacht && (k.geslacht.toLowerCase().startsWith('j') || k.geslacht.toLowerCase() === 'm');
+        if (k.geslacht !== huidigGeslacht) {
+          if (huidigGeslacht !== null) {}
+          html += '<div class="list-section-header">' + (k.geslacht || 'Onbekend') + '</div>';
+          huidigGeslacht = k.geslacht;
+          num = 1;
+        }
+        html += '<div class="list-row">' +
+          '<div class="list-num">' + num + '</div>' +
+          '<div class="list-naam">' + k.voornaam + ' ' + k.achternaam + '</div>' +
+          '<div class="list-meta">' +
+            (k.leeftijd !== null ? '<span class="tag-age">' + k.leeftijd + ' jr</span>' : '') +
+            '<span class="tag ' + (isJongen ? 'tag-j' : 'tag-m') + '">' + (k.geslacht||'?') + '</span>' +
+          '</div></div>';
+        num++;
+      });
+      html += '</div>';
+      document.getElementById('resultaat').innerHTML = html;
+
+    } else if (huidigeModus === 'naam') {
+      sorted.sort(function(a,b) {
+        var A = a.voornaam.toLowerCase(), B = b.voornaam.toLowerCase();
+        return A < B ? -1 : A > B ? 1 : 0;
+      });
+      var html = '<div class="results-header"><div class="results-title">Gesorteerd op voornaam</div>' +
+        '<div class="results-meta">' + kinderen.length + ' kinderen</div></div>' +
+        '<div class="list-view">';
+      sorted.forEach(function(k, i) {
+        var isJongen = k.geslacht && (k.geslacht.toLowerCase().startsWith('j') || k.geslacht.toLowerCase() === 'm');
+        html += '<div class="list-row">' +
+          '<div class="list-num">' + (i+1) + '</div>' +
+          '<div class="list-naam">' + k.voornaam + ' ' + k.achternaam + '</div>' +
+          '<div class="list-meta">' +
+            (k.leeftijd !== null ? '<span class="tag-age">' + k.leeftijd + ' jr</span>' : '') +
+            '<span class="tag ' + (isJongen ? 'tag-j' : 'tag-m') + '">' + (k.geslacht||'?') + '</span>' +
+          '</div></div>';
+      });
+      html += '</div>';
+      document.getElementById('resultaat').innerHTML = html;
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>
