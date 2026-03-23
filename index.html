@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Kamp 2 – Groepjes</title>
+  <title>Kamp 2 – Groepjes Indeler</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
   <style>
     :root {
@@ -360,6 +360,140 @@
       .container { padding: 24px 16px 60px; }
       .control-label { min-width: 100%; }
     }
+
+    /* Schema section */
+    .schema-section {
+      margin-top: 40px;
+    }
+
+    .schema-controls {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 24px 32px;
+      border: 1px solid var(--border);
+      margin-bottom: 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .schema-controls-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .posten-input {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 9px 16px;
+      border-radius: 10px;
+      border: 2px solid var(--border);
+      background: var(--bg);
+      color: var(--dark);
+      width: 80px;
+      text-align: center;
+      outline: none;
+    }
+
+    .posten-input:focus { border-color: var(--accent2); }
+
+    .schema-table-wrap {
+      overflow-x: auto;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .schema-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card);
+      font-size: 14px;
+      min-width: 500px;
+    }
+
+    .schema-table th {
+      font-family: 'Syne', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--mid);
+      padding: 12px 16px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .schema-table td {
+      padding: 11px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    .schema-table tr:last-child td { border-bottom: none; }
+
+    .schema-table tr:hover td { background: #FAFAF8; }
+
+    .ronde-badge {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 13px;
+      background: var(--dark);
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 8px;
+      white-space: nowrap;
+    }
+
+    .post-badge {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent2);
+      background: var(--tag-m);
+      padding: 4px 10px;
+      border-radius: 8px;
+      white-space: nowrap;
+    }
+
+    .vs-badge {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--dark);
+    }
+
+    .bye-badge {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--mid);
+      background: var(--bg);
+      padding: 4px 10px;
+      border-radius: 8px;
+      border: 1px dashed var(--border);
+    }
+
+    .groep-label {
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+
+    .schema-warning {
+      background: #FFF8E6;
+      border: 1px solid #F5C842;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #7A5800;
+      margin-bottom: 16px;
+    }
   </style>
 </head>
 <body>
@@ -399,6 +533,24 @@
 
   <div id="resultaat">
     <div class="status"><span class="icon">⏳</span>Kinderen laden…</div>
+  </div>
+
+  <div id="schema-section" style="display:none;" class="schema-section">
+    <div class="schema-controls">
+      <div class="schema-controls-title">📋 Doordraai­schema</div>
+      <label style="font-size:14px;font-weight:600;">Teams per post:</label>
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="tpp-2" onclick="setTeamsPerPost(2)">2 teams</button>
+        <button class="mode-btn" id="tpp-3" onclick="setTeamsPerPost(3)">3 teams</button>
+        <button class="mode-btn" id="tpp-4" onclick="setTeamsPerPost(4)">4 teams</button>
+      </div>
+      <div id="schema-info" style="font-size:13px;color:var(--mid);font-weight:600;"></div>
+      <div class="mode-toggle" style="margin-left:auto;">
+        <button class="mode-btn active" id="view-ronde" onclick="setSchemaView('ronde')">📋 Per ronde</button>
+        <button class="mode-btn" id="view-groep" onclick="setSchemaView('groep')">👥 Per groep</button>
+      </div>
+    </div>
+    <div id="schema-output"></div>
   </div>
 
 </div>
@@ -576,6 +728,11 @@
 
     html += '</div>';
     document.getElementById('resultaat').innerHTML = html;
+
+    // Store current groups and show schema section
+    huidigeGroepen = groepen;
+    document.getElementById('schema-section').style.display = 'block';
+    maakSchema();
   }
 
   function renderSorted() {
@@ -651,6 +808,258 @@
       html += '</div>';
       document.getElementById('resultaat').innerHTML = html;
     }
+  }
+
+  var huidigeGroepen = [];
+  var colors = ['#E8440A','#2D6BE4','#1A9E5C','#9B3DD6','#D4A017','#C4006A','#0891B2','#EA580C'];
+  var teamsPerPost = 2;
+  var schemaView = 'ronde';
+  var huidigeRondes = [];
+
+  function setSchemaView(v) {
+    schemaView = v;
+    document.querySelectorAll('[id^="view-"]').forEach(function(b) { b.classList.remove('active'); });
+    document.getElementById('view-' + v).classList.add('active');
+    renderSchema();
+  }
+
+  function setTeamsPerPost(n) {
+    teamsPerPost = n;
+    document.querySelectorAll('[id^="tpp-"]').forEach(function(b) { b.classList.remove('active'); });
+    document.getElementById('tpp-' + n).classList.add('active');
+    maakSchema();
+  }
+
+  function maakSchema() {
+    var groepen = huidigeGroepen;
+    var n = groepen.length;
+    if (n < 2) return;
+
+    var tpp = teamsPerPost;
+    var P = Math.floor(n / tpp);
+    if (P < 1) P = 1;
+
+    // Greedy algorithm: each round assign groups to unvisited posts,
+    // minimizing repeated matchups. Run multiple seeds, keep best result.
+    var bestSchema = null;
+    var bestDups = Infinity;
+
+    for (var seed = 0; seed < 15; seed++) {
+      var schema = greedySchema(n, tpp, P, seed);
+      if (!schema) continue;
+      var dups = countDups(schema, n);
+      if (dups < bestDups) {
+        bestDups = dups;
+        bestSchema = schema;
+      }
+    }
+
+    huidigeRondes = bestSchema || greedySchema(n, tpp, P, 0);
+
+    var infoEl = document.getElementById('schema-info');
+    infoEl.textContent = P + ' posten · ' + P + ' rondes · elke groep bezoekt elke post 1x';
+
+    renderSchema();
+  }
+
+  function seededRand(seed) {
+    // Simple seeded PRNG (mulberry32)
+    return function() {
+      seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+      var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  function greedySchema(n, tpp, P, seed) {
+    var rng = seededRand(seed * 1337 + 42);
+    var pairCount = {};
+    var postVisited = [];
+    for (var g = 0; g < n; g++) postVisited.push({});
+    var schema = [];
+
+    for (var r = 0; r < P; r++) {
+      // Available posts per group this round
+      var available = {};
+      for (var g = 0; g < n; g++) {
+        available[g] = [];
+        for (var p = 0; p < P; p++) {
+          if (!postVisited[g][p]) available[g].push(p);
+        }
+      }
+
+      var bestSlots = null;
+      var bestScore = Infinity;
+
+      for (var attempt = 0; attempt < 60; attempt++) {
+        var postGroups = {};
+        for (var p = 0; p < P; p++) postGroups[p] = [];
+
+        // Shuffle group order
+        var order = [];
+        for (var g = 0; g < n; g++) order.push(g);
+        for (var i = order.length - 1; i > 0; i--) {
+          var j = Math.floor(rng() * (i + 1));
+          var tmp = order[i]; order[i] = order[j]; order[j] = tmp;
+        }
+
+        var success = true;
+        for (var oi = 0; oi < order.length; oi++) {
+          var g = order[oi];
+          var avail = available[g].filter(function(p) { return postGroups[p].length < tpp; });
+          if (!avail.length) { success = false; break; }
+
+          // Pick post that minimizes pair repetitions
+          var bestP = avail[0];
+          var bestPScore = Infinity;
+          // Shuffle avail for tie-breaking randomness
+          for (var i = avail.length - 1; i > 0; i--) {
+            var j = Math.floor(rng() * (i + 1));
+            var tmp = avail[i]; avail[i] = avail[j]; avail[j] = tmp;
+          }
+          for (var ai = 0; ai < avail.length; ai++) {
+            var p = avail[ai];
+            var score = 0;
+            for (var xi = 0; xi < postGroups[p].length; xi++) {
+              var x = postGroups[p][xi];
+              var key = Math.min(g,x) + '_' + Math.max(g,x);
+              score += pairCount[key] || 0;
+            }
+            if (score < bestPScore) { bestPScore = score; bestP = p; }
+          }
+          postGroups[bestP].push(g);
+        }
+
+        if (!success) continue;
+
+        // Score this round
+        var score = 0;
+        for (var p = 0; p < P; p++) {
+          var gs = postGroups[p];
+          for (var i = 0; i < gs.length; i++) {
+            for (var j = i + 1; j < gs.length; j++) {
+              var key = Math.min(gs[i],gs[j]) + '_' + Math.max(gs[i],gs[j]);
+              score += pairCount[key] || 0;
+            }
+          }
+        }
+        if (score < bestScore) {
+          bestScore = score;
+          bestSlots = [];
+          for (var p = 0; p < P; p++) bestSlots.push(postGroups[p].slice());
+        }
+      }
+
+      if (!bestSlots) return null;
+
+      // Update tracking
+      for (var p = 0; p < P; p++) {
+        var gs = bestSlots[p];
+        for (var i = 0; i < gs.length; i++) {
+          postVisited[gs[i]][p] = true;
+          for (var j = i + 1; j < gs.length; j++) {
+            var key = Math.min(gs[i],gs[j]) + '_' + Math.max(gs[i],gs[j]);
+            pairCount[key] = (pairCount[key] || 0) + 1;
+          }
+        }
+      }
+      schema.push(bestSlots);
+    }
+    return schema;
+  }
+
+  function countDups(schema, n) {
+    var pairCount = {};
+    schema.forEach(function(ps) {
+      ps.forEach(function(gs) {
+        for (var i = 0; i < gs.length; i++)
+          for (var j = i+1; j < gs.length; j++) {
+            var key = Math.min(gs[i],gs[j]) + '_' + Math.max(gs[i],gs[j]);
+            pairCount[key] = (pairCount[key] || 0) + 1;
+          }
+      });
+    });
+    return Object.values(pairCount).reduce(function(s,v){ return s + Math.max(0, v-1); }, 0);
+  }
+
+  function renderSchema() {
+    if (schemaView === 'ronde') renderSchemaPerRonde();
+    else renderSchemaPerGroep();
+  }
+
+  function renderSchemaPerRonde() {
+    var html = '<div class="schema-table-wrap"><table class="schema-table">';
+    html += '<thead><tr><th>Ronde</th><th>Post</th><th>Groepen</th></tr></thead><tbody>';
+
+    huidigeRondes.forEach(function(postSlots, ri) {
+      var rowspan = postSlots.length;
+      var eersteRij = true;
+
+      postSlots.forEach(function(groepen, pi) {
+        html += '<tr>';
+        if (eersteRij) {
+          html += '<td rowspan="' + rowspan + '"><span class="ronde-badge">Ronde ' + (ri + 1) + '</span></td>';
+          eersteRij = false;
+        }
+        html += '<td><span class="post-badge">Post ' + (pi + 1) + '</span></td><td>';
+        groepen.forEach(function(g, idx) {
+          var c = colors[g % colors.length];
+          if (idx > 0) html += ' <span class="vs-badge">vs</span> ';
+          html += '<span class="groep-label" style="background:' + c + '22;color:' + c + '">Groep ' + (g + 1) + '</span>';
+        });
+        html += '</td></tr>';
+      });
+    });
+
+    html += '</tbody></table></div>';
+    document.getElementById('schema-output').innerHTML = html;
+  }
+
+  function renderSchemaPerGroep() {
+    var n = huidigeGroepen.length;
+
+    // Build per-group lookup: perGroep[g] = [{ronde, post, tegenstanders}]
+    var perGroep = [];
+    for (var g = 0; g < n; g++) perGroep.push([]);
+
+    huidigeRondes.forEach(function(postSlots, ri) {
+      postSlots.forEach(function(groepen, pi) {
+        groepen.forEach(function(g) {
+          var tegenstanders = groepen.filter(function(x){ return x !== g; });
+          perGroep[g].push({
+            ronde: ri + 1,
+            post: pi + 1,
+            tegenstanders: tegenstanders
+          });
+        });
+      });
+    });
+
+    var html = '<div class="groups-grid">';
+    for (var g = 0; g < n; g++) {
+      var c = colors[g % colors.length];
+      html += '<div class="group-card">';
+      html += '<div class="group-header">' +
+        '<div class="group-name" style="color:' + c + '">Groep ' + (g + 1) + '</div>' +
+        '<div class="group-size">' + perGroep[g].length + ' rondes</div>' +
+        '</div>';
+      html += '<div class="group-body">';
+      perGroep[g].forEach(function(entry) {
+        html += '<div class="kind-row">' +
+          '<div class="kind-naam"><span class="ronde-badge" style="font-size:11px;padding:3px 9px;">Ronde ' + entry.ronde + '</span></div>' +
+          '<div class="kind-meta">' +
+            '<span class="post-badge">Post ' + entry.post + '</span>';
+        entry.tegenstanders.forEach(function(x) {
+          var cx = colors[x % colors.length];
+          html += ' <span class="groep-label" style="background:' + cx + '22;color:' + cx + ';font-size:12px;">vs G' + (x + 1) + '</span>';
+        });
+        html += '</div></div>';
+      });
+      html += '</div></div>';
+    }
+    html += '</div>';
+    document.getElementById('schema-output').innerHTML = html;
   }
 
   init();
